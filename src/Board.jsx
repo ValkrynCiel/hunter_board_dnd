@@ -12,41 +12,60 @@ export default class Board extends Component {
         'green',
         'blue',
         'purple'
-      ]
+      ],
+      draggedBox: null
     }
-    this.draggedBox = null;
+    // this.handleDragStart = this.handleDragStart.bind(this);
+    // this.handleDragOver = this.handleDragOver.bind(this);
+    // this.handleDragEnd = this.handleDragEnd.bind(this);
   }
 
   handleDragStart = (e, index) => {
-    let evt = e;
-    this.draggedBox = this.state.boxes[index];
-    evt.dataTransfer.effectAllowed = "move";
+    let target = e.target;
+    this.setState({draggedBox: this.state.boxes[index]});
+    e.dataTransfer.effectAllowed = "move";
+    setTimeout(() => { 
+      target.style.opacity = 0.5;
+      target.style.margin = '1.5em'
+    }, 0);
+    console.log('start')
   }
 
   handleDragOver = index => {
+    console.log('over')
     const draggedOverBox = this.state.boxes[index];
 
-    if (this.draggedBox === draggedOverBox) return;
+    if (this.state.draggedBox === draggedOverBox) return;
 
-    let boxes = this.state.boxes.filter(b => b !== this.draggedBox);
+    let boxes = this.state.boxes.filter(b => b !== this.state.draggedBox);
 
-    boxes.splice(index, 0, this.draggedBox);
+    boxes.splice(index, 0, this.state.draggedBox);
 
     this.setState({ boxes });
   }
 
-  handleDragEnd = () => {
-    this.draggedBox = null;
+  handleDragEnd = (e) => {
+    console.log('end')
+    e.target.style.opacity = 1;
+    e.target.style.margin = '0'
+    this.setState({draggedBox: null})
   };
 
   render () {
+    let style = {
+      backgroundColor: 'black',
+      zIndex: 10,
+      width: '1000px',
+      height: '1000px'
+    }
     return (
-      <div>
+      <div style = {style}>
         {this.state.boxes.map((c, i) => <Box
-                               key = {c} 
+                               key = {c}
+                               isDragging = {this.state.draggedBox === c} 
                                handleDragStart={e => this.handleDragStart(e, i)}
                                handleDragOver={() => this.handleDragOver(i)} 
-                               handleDragEnd={() => this.handleDragEnd()}
+                               handleDragEnd={e => this.handleDragEnd(e)}
                                color = {c}/>)}
       </div>
     )
